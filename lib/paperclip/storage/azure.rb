@@ -1,4 +1,5 @@
-require 'azure/storage'
+require 'azure/storage/blob'
+require "azure/storage/common"
 require 'paperclip/storage/azure/environment'
 
 module Paperclip
@@ -85,6 +86,7 @@ module Paperclip
         if path(style_name)
           uri = URI "#{container_name}/#{path(style_name).gsub(%r{\A/}, '')}"
           generator = ::Azure::Storage::Core::Auth::SharedAccessSignature.new azure_account_name,
+          generator = ::Azure::Storage::Common::Core::Auth::SharedAccessSignature.new azure_account_name,
             azure_storage_client.storage_access_key
 
           uri = generator.signed_uri uri, false, service:      'b',
@@ -139,7 +141,7 @@ module Paperclip
 
           config[:storage_blob_host] = "https://#{Environment.url_for azure_credentials[:storage_account_name], azure_credentials[:region]}" if azure_credentials[:region]
 
-          ::Azure::Storage::Client.create config
+          ::Azure::Storage::Common::Client.create config
         end
       end
 
@@ -148,7 +150,7 @@ module Paperclip
         return instances[options] if instance[options]
 
         service = ::Azure::Storage::Blob::BlobService.new(client: azure_storage_client)
-        service.with_filter ::Azure::Storage::Core::Filter::ExponentialRetryPolicyFilter.new
+        service.with_filter ::Azure::Storage::Common::Core::Filter::ExponentialRetryPolicyFilter.new
 
         instances[options] = service
       end
