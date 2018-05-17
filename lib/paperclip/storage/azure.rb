@@ -84,17 +84,17 @@ module Paperclip
 
       def expiring_url(time = 3600, style_name = default_style)
         if path(style_name)
-          uri = URI "#{container_name}/#{path(style_name).gsub(%r{\A/}, '')}"
-          generator = ::Azure::Storage::Core::Auth::SharedAccessSignature.new azure_account_name,
+          path = "#{container_name}/#{path(style_name).gsub(%r{\A/}, '')}"
           generator = ::Azure::Storage::Common::Core::Auth::SharedAccessSignature.new azure_account_name,
             azure_storage_client.storage_access_key
 
-          uri = generator.signed_uri uri, false, service:      'b',
-                                           resource:     'b',
-                                           permissions:  'r',
-                                           start:        (Time.now - (5 * 60)).utc.iso8601,
-                                           expiry:       (Time.now + time).utc.iso8601
-          azure_interface.generate_uri(uri.path, CGI::parse(uri.query || "")).to_s
+          token = generator.generate_service_sas_token path,
+            service:      'b',
+            resource:     'b',
+            permissions:  'r',
+            start:        (Time.now - (5 * 60)).utc.iso8601,
+            expiry:       (Time.now + time).utc.iso8601
+          azure_interface.generate_uri(URI.encode(path), CGI::parse(token)).to_s
         else
           url(style_name)
         end
@@ -156,7 +156,7 @@ module Paperclip
       end
 
       def azure_uri(style_name = default_style)
-        uri = URI "#{container_name}/#{path(style_name).gsub(%r{\A/}, '')}"
+        uri = URI.parse(URI.encode("#{container_name}/#{path(style_name).gsub(%r{\A/}, '')}"))
         azure_interface.generate_uri uri.path, CGI::parse(uri.query || "")
       end
 
