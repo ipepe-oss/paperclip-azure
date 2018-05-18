@@ -190,6 +190,52 @@ describe Paperclip::Storage::Azure do
     end
   end
 
+  describe "An attachment that uses Azure for storage and has a non-ascii char in file name" do
+    before do
+      rebuild_model storage: :azure,
+        styles: { large: ['500x500#', :jpg] },
+        container: "container",
+        azure_credentials: {
+          storage_account_name: 'storage',
+          storage_access_key: storage_access_key
+        }
+
+      file = stringy_file
+      class << file
+        def original_filename
+          "äüöëéêè.png"
+        end
+      end
+
+      @dummy = Dummy.new
+      @dummy.avatar = file
+      @dummy.save
+
+      allow(@dummy).to receive(:new_record?).and_return(false)
+    end
+
+    it "returns a encoded version as url" do
+      expect(@dummy.avatar.url).to match(/.+\/"%C3%A4%C3%BC%C3%B6%C3%AB%C3%A9%C3%AA%C3%A8.png/)
+    end
+
+    it "generates a expiring_url" do
+      rails_env("production") do
+        expect { @dummy.avatar.expiring_url(1800) }.not_to raise_error
+      end
+    end
+
+    it "generates a expiring_url" do
+      rails_env("production") do
+        expect { @dummy.avatar.expiring_url(1800) }.not_to raise_error
+      end
+    end
+
+    it "calls the signer with the unencoded path" do
+      expect_any_instance_of(::Azure::Storage::Common::Core::Auth::SharedAccessSignature).to receive(:generate_service_sas_token).with(/äüöëéêè.png/, anything).and_call_original
+      @dummy.avatar.expiring_url(1800)
+    end
+  end
+
   describe ":asset_host path Interpolations" do
     before do
       rebuild_model storage: :azure,
