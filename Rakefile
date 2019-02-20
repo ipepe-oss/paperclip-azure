@@ -10,7 +10,7 @@ Hoe.plugin :gemspec
 Hoe.plugin :rubygems
 
 Hoe.spec "paperclip-azure" do
-  developer("hireross.com", "help@hireross.com")
+  developer "hireross.com", "help@hireross.com"
   license "MIT" # this should match the license in the README
 
   extra_deps << ['azure', '~> 0.7']
