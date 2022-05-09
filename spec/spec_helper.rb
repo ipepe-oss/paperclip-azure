@@ -10,6 +10,7 @@ require 'activerecord-import'
 require 'simplecov'
 require 'yaml'
 require 'paperclip'
+require 'byebug'
 
 ROOT = Pathname(File.expand_path(File.join(File.dirname(__FILE__), '..')))
 
