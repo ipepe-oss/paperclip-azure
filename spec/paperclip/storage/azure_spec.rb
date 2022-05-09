@@ -215,7 +215,7 @@ describe Paperclip::Storage::Azure do
     end
 
     it "returns a encoded version as url" do
-      expect(@dummy.avatar.url).to match(/.+\/"%C3%A4%C3%BC%C3%B6%C3%AB%C3%A9%C3%AA%C3%A8.png/)
+      expect(@dummy.avatar.url).to match(/.+\/%25C3%25A4%25C3%25BC%25C3%25B6%25C3%25AB%25C3%25A9%25C3%25AA%25C3%25A8.png\.*/)
     end
 
     it "generates a expiring_url" do
