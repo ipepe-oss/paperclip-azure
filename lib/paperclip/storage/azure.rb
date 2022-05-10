@@ -56,9 +56,9 @@ module Paperclip
     module Azure
       def self.extended base
         begin
-          require 'azure'
+          require 'azure/storage/blob/blob_service'
         rescue LoadError => e
-          e.message << " (You may need to install the azure SDK gem)"
+          e.message << " (You may need to install the azure-storage-blob gem)"
           raise e
         end unless defined?(::Azure::Core)
 
