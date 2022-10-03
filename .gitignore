@@ -5,6 +5,8 @@
 *.gem
 *.rbc
 *.swp
+*.log
+*.sarif
 /.config
 /coverage/
 /InstalledFiles

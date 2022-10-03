@@ -1,5 +1,5 @@
-module Paperclip; end
-
-class Paperclip::Azure
-  VERSION = "1.1.0"
+module Paperclip
+  class Azure
+    VERSION = "2.0.0".freeze
+  end
 end
