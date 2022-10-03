@@ -208,8 +208,9 @@ module Paperclip
         azure_interface.create_container container_name
       end
 
-      def flush_writes #:nodoc:
+      def flush_writes
         @queued_for_write.each do |style, file|
+          retries = 0
           begin
             log("saving #{path(style)}")
 
@@ -224,7 +225,8 @@ module Paperclip
             raise if e.status_code != 404
 
             create_container
-            retry
+            retries += 1
+            retry unless retries >= 3
           ensure
             file.rewind
           end
