@@ -92,6 +92,19 @@ module Paperclip
         end
       end
 
+      def local_temp_copy(style: default_style, file_extension: nil)
+        file_extension ||= File.extname(original_filename).presence || ".tmp"
+        tempfile = Tempfile.new([original_filename.presence, file_extension])
+        if Paperclip::Attachment.default_options[:storage] != :azure || File.exist?(path(style))
+          FileUtils.cp_r(path(style), tempfile.path)
+        else
+          copy_to_local_file(style, tempfile.path)
+        end
+        tempfile
+      rescue StandardError
+        nil
+      end
+
       def expiring_url(time = 3600, style_name = default_style)
         if path(style_name)
           path = "#{container_name}/#{path(style_name).gsub(%r{\A/}, '')}"
