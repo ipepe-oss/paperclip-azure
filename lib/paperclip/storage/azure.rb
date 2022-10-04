@@ -173,7 +173,9 @@ module Paperclip
           service = ::Azure::Storage::Blob::BlobService.create(use_development_storage: true)
         else
           service = ::Azure::Storage::Blob::BlobService.new(client: azure_storage_client)
-          service.with_filter ::Azure::Storage::Common::Core::Filter::ExponentialRetryPolicyFilter.new
+          service.with_filter(
+            ::Azure::Storage::Common::Core::Filter::ExponentialRetryPolicyFilter.new
+          )
         end
 
         instances[options] = service
