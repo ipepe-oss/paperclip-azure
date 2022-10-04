@@ -3,7 +3,8 @@ AllCops:
   TargetRubyVersion: 2.4
   Exclude:
     - spec/**/*
-
+Lint/UriEscapeUnescape:
+  Enabled: false
 Metrics:
   Exclude:
     - lib/paperclip/storage/azure.rb
