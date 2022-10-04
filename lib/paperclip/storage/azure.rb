@@ -1,6 +1,6 @@
-require 'azure/storage/blob'
+require "azure/storage/blob"
 require "azure/storage/common"
-require 'paperclip/storage/azure/environment'
+require "paperclip/storage/azure/environment"
 
 module Paperclip
   module Storage
@@ -96,15 +96,15 @@ module Paperclip
         if path(style_name)
           path = "#{container_name}/#{path(style_name).gsub(%r{\A/}, '')}"
           generator = ::Azure::Storage::Common::Core::Auth::SharedAccessSignature.new azure_account_name,
-            azure_storage_client.storage_access_key
+                                                                                      azure_storage_client.storage_access_key
 
           token = generator.generate_service_sas_token path,
-            service:      'b',
-            resource:     'b',
-            permissions:  'r',
-            start:        (Time.now - (5 * 60)).utc.iso8601,
-            expiry:       (Time.now + time).utc.iso8601
-          azure_interface.generate_uri(URI.encode(path), CGI::parse(token)).to_s
+                                                       service: "b",
+                                                       resource: "b",
+                                                       permissions: "r",
+                                                       start: (Time.now - (5 * 60)).utc.iso8601,
+                                                       expiry: (Time.now + time).utc.iso8601
+          azure_interface.generate_uri(URI.encode(path), CGI.parse(token)).to_s
         else
           url(style_name)
         end
@@ -148,11 +148,13 @@ module Paperclip
         @azure_storage_client ||= begin
           config = {}
 
-          [:storage_account_name, :storage_access_key, :use_development_storage].each do |opt|
+          %i[storage_account_name storage_access_key use_development_storage].each do |opt|
             config[opt] = azure_credentials[opt] if azure_credentials[opt]
           end
 
-          config[:storage_blob_host] = "https://#{Environment.url_for azure_credentials[:storage_account_name], azure_credentials[:region]}" if azure_credentials[:region]
+          if azure_credentials[:region]
+            config[:storage_blob_host] = "https://#{Environment.url_for azure_credentials[:storage_account_name], azure_credentials[:region]}"
+          end
 
           ::Azure::Storage::Common::Client.create config
         end
@@ -170,7 +172,7 @@ module Paperclip
 
       def azure_uri(style_name = default_style)
         uri = URI.parse(URI.encode("#{container_name}/#{path(style_name).gsub(%r{\A/}, '')}"))
-        azure_interface.generate_uri uri.path, CGI::parse(uri.query || "")
+        azure_interface.generate_uri uri.path, CGI.parse(uri.query || "")
       end
 
       def azure_base_url
@@ -270,7 +272,7 @@ module Paperclip
       def copy_to_local_file(style, local_dest_path)
         log("copying #{path(style)} to local file #{local_dest_path}")
 
-        _, content = azure_interface.get_blob(container_name, path(style).sub(%r{\A/},''))
+        _, content = azure_interface.get_blob(container_name, path(style).sub(%r{\A/}, ""))
 
         ::File.open(local_dest_path, "wb") do |local_file|
           local_file.write(content)
