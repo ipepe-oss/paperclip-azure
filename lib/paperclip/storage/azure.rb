@@ -95,10 +95,10 @@ module Paperclip
       def local_temp_copy(style: default_style)
         file_extension ||= File.extname(original_filename).presence || ".tmp"
         tempfile = Tempfile.new([original_filename.presence, file_extension])
-        if Paperclip::Attachment.default_options[:storage] == :azure
-          copy_to_local_file(style, tempfile.path)
-        else
+        if File.exist?(path(style))
           FileUtils.cp_r(path(style), tempfile.path)
+        else
+          copy_to_local_file(style, tempfile.path)
         end
         tempfile
       rescue StandardError
