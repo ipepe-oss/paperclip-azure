@@ -95,8 +95,10 @@ module Paperclip
       def expiring_url(time = 3600, style_name = default_style)
         if path(style_name)
           path = "#{container_name}/#{path(style_name).gsub(%r{\A/}, '')}"
-          generator = ::Azure::Storage::Common::Core::Auth::SharedAccessSignature.new azure_account_name,
-                                                                                      azure_storage_client.storage_access_key
+          generator = ::Azure::Storage::Common::Core::Auth::SharedAccessSignature.new(
+            azure_account_name,
+            azure_storage_client.storage_access_key
+          )
 
           token = generator.generate_service_sas_token path,
                                                        service: "b",
@@ -153,7 +155,10 @@ module Paperclip
           end
 
           if azure_credentials[:region]
-            config[:storage_blob_host] = "https://#{Environment.url_for azure_credentials[:storage_account_name], azure_credentials[:region]}"
+            config[:storage_blob_host] = "https://" + Environment.url_for(
+              azure_credentials[:storage_account_name],
+              azure_credentials[:region]
+            ).to_s
           end
 
           ::Azure::Storage::Common::Client.create config
