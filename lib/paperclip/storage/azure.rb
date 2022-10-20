@@ -92,13 +92,15 @@ module Paperclip
         end
       end
 
-      def local_temp_copy(style: default_style, file_extension: nil)
+      def local_temp_copy(style: default_style, file_extension: nil, parameterize_filename: false)
+        file_name = (original_filename.presence || "skrimarket_#{SecureRandom.hex(10)}")
+        file_name = file_name.parameterize if parameterize_filename
         file_extension ||= File.extname(original_filename).presence || ".tmp"
-        tempfile = Tempfile.new([original_filename.presence, file_extension])
-        if Paperclip::Attachment.default_options[:storage] != :azure || File.exist?(path(style))
-          FileUtils.cp_r(path(style), tempfile.path)
-        else
+        tempfile = Tempfile.new([file_name, file_extension])
+        if Paperclip::Attachment.default_options[:storage] == :azure
           copy_to_local_file(style, tempfile.path)
+        else
+          FileUtils.cp_r(path(style), tempfile.path)
         end
         tempfile
       rescue StandardError
@@ -241,7 +243,8 @@ module Paperclip
             log("saving #{path(style)}")
 
             write_options = {
-              content_type: file.content_type
+              content_type: file.content_type,
+              content_disposition: "attachment; filename=#{file.original_filename}"
             }
 
             if azure_container
