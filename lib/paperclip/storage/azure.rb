@@ -243,7 +243,8 @@ module Paperclip
             log("saving #{path(style)}")
 
             write_options = {
-              content_type: file.content_type
+              content_type: file.content_type,
+              content_disposition: "attachment; filename=#{file.original_filename}"
             }
 
             if azure_container
