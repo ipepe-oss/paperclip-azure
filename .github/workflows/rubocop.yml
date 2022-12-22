@@ -8,12 +8,9 @@ name: "Rubocop"
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "v103-fixed" ]
   pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "main" ]
-  schedule:
-    - cron: '40 3 * * 0'
+    branches: [ "main", "v103-fixed" ]
 
 jobs:
   rubocop:
