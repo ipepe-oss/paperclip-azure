@@ -4,12 +4,16 @@
 ### Ruby ###
 *.gem
 *.rbc
+*.swp
+*.log
+*.sarif
 /.config
 /coverage/
 /InstalledFiles
 /pkg/
 /spec/reports/
 /spec/examples.txt
+/spec/debug.log
 /test/tmp/
 /test/version_tmp/
 /tmp/

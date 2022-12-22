@@ -109,8 +109,8 @@ describe Paperclip::Storage::Azure do
                     container: "container",
                     path: ":attachment/:basename:dotextension",
                     azure_credentials: {
-                      'access_key_id' => "12345",
-                      'secret_access_key' => "54321"
+                      storage_account_name: 'storage',
+                      storage_access_key: storage_access_key
                     }
 
         File.open(fixture_file('5k.png'), 'rb') do |file|
@@ -136,7 +136,8 @@ describe Paperclip::Storage::Azure do
                     styles: { large: ["500x500#", :jpg] },
                     container: "container",
                     azure_credentials: {
-                      "storage_access_key" => "54321"
+                      storage_account_name: 'storage',
+                      storage_access_key: storage_access_key
                     }
 
       File.open(fixture_file("spaced file.png"), "rb") do |file|
@@ -162,17 +163,16 @@ describe Paperclip::Storage::Azure do
                     styles: { large: ['500x500#', :jpg] },
                     container: "container",
                     azure_credentials: {
-                      'storage_access_key' => "54321"
+                      storage_account_name: 'storage',
+                      storage_access_key: storage_access_key
                     }
 
-      stringio = stringy_file
-      class << stringio
+      file = stringy_file
+      class << file
         def original_filename
           "question?mark.png"
         end
       end
-
-      file = Paperclip.io_adapters.for(stringio)
 
       @dummy = Dummy.new
       @dummy.avatar = file
@@ -187,6 +187,52 @@ describe Paperclip::Storage::Azure do
 
     it "returns a replaced version for url" do
       expect(@dummy.avatar.url).to match(/.+\/question_mark\.png/)
+    end
+  end
+
+  describe "An attachment that uses Azure for storage and has a non-ascii char in file name" do
+    before do
+      rebuild_model storage: :azure,
+        styles: { large: ['500x500#', :jpg] },
+        container: "container",
+        azure_credentials: {
+          storage_account_name: 'storage',
+          storage_access_key: storage_access_key
+        }
+
+      file = stringy_file
+      class << file
+        def original_filename
+          "äüöëéêè.png"
+        end
+      end
+
+      @dummy = Dummy.new
+      @dummy.avatar = file
+      @dummy.save
+
+      allow(@dummy).to receive(:new_record?).and_return(false)
+    end
+
+    it "returns a encoded version as url" do
+      expect(@dummy.avatar.url).to match(/.+\/%25C3%25A4%25C3%25BC%25C3%25B6%25C3%25AB%25C3%25A9%25C3%25AA%25C3%25A8.png\.*/)
+    end
+
+    it "generates a expiring_url" do
+      rails_env("production") do
+        expect { @dummy.avatar.expiring_url(1800) }.not_to raise_error
+      end
+    end
+
+    it "generates a expiring_url" do
+      rails_env("production") do
+        expect { @dummy.avatar.expiring_url(1800) }.not_to raise_error
+      end
+    end
+
+    it "calls the signer with the unencoded path" do
+      expect_any_instance_of(::Azure::Storage::Core::Auth::SharedAccessSignature).to receive(:generate_service_sas_token).with(/äüöëéêè.png/, anything).and_call_original
+      @dummy.avatar.expiring_url(1800)
     end
   end
 
