@@ -7,7 +7,8 @@ Gem::Specification.new do |gem|
   gem.version       = Paperclip::Azure::VERSION
   gem.authors       = ["hireross.com"]
   gem.email         = ["help@hireross.com"]
-  gem.summary       = "Paperclip-Azure is a Paperclip storage driver for storing files in a Microsoft Azure Blob"
+  gem.summary       = "Paperclip-Azure is a Paperclip storage driver for storing files" \
+                      " in a Microsoft Azure Blob"
   gem.homepage      = "https://github.com/supportify/paperclip-azure"
 
   gem.files         = `git ls-files`.split($INPUT_RECORD_SEPARATOR)

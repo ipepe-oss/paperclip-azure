@@ -50,7 +50,8 @@ module Paperclip
     #   to interpolate. Keys should be unique, like filenames, and despite the fact that
     #   Azure (strictly speaking) does not support directories, you can still use a / to
     #   separate parts of your file name.
-    # * +region+: Depending on the region, different base urls are used. Supported values :global, :de
+    # * +region+: Depending on the region, different base urls are used.
+    # Supported values :global, :de
 
     module Azure
       def self.extended(base)
@@ -66,8 +67,9 @@ module Paperclip
         base.instance_eval do
           @azure_options = @options[:azure_options] || {}
 
-          unless @options[:url].to_s.match(/\A:azure.*url\z/) || @options[:url] == ":asset_host".freeze
-            @options[:path] = path_option.gsub(/:url/, @options[:url]).sub(%r{\A:rails_root/public/system}, "".freeze)
+          unless @options[:url].to_s.match(/\A:azure.*url\z/) || @options[:url] == ":asset_host"
+            @options[:path] = path_option.gsub(/:url/, @options[:url]).
+                              sub(%r{\A:rails_root/public/system}, "".freeze)
             @options[:url]  = ":azure_path_url".freeze
           end
           @options[:url] = @options[:url].inspect if @options[:url].is_a?(Symbol)
@@ -90,8 +92,10 @@ module Paperclip
       def expiring_url(time = 3600, style_name = default_style)
         if path(style_name)
           uri = URI azure_uri(style_name)
-          generator = ::Azure::Storage::Core::Auth::SharedAccessSignature.new azure_account_name,
-                                                                              azure_credentials[:storage_access_key]
+          generator = ::Azure::Storage::Core::Auth::SharedAccessSignature.new(
+            azure_account_name,
+            azure_credentials[:storage_access_key]
+          )
 
           generator.signed_uri uri, false, service: "b",
                                            resource: "b",
@@ -104,8 +108,11 @@ module Paperclip
       end
 
       def auto_connect_duration
-        @auto_connect_duration ||= @options[:auto_connect_duration] || azure_credentials[:auto_connect_duration] || 10
-        @auto_connect_duration
+        @auto_connect_duration ||= begin
+          @options[:auto_connect_duration] ||
+            azure_credentials[:auto_connect_duration] ||
+            10
+        end
       end
 
       def azure_credentials
@@ -113,7 +120,10 @@ module Paperclip
       end
 
       def azure_account_name
-        account_name = @options[:azure_storage_account_name] || azure_credentials[:storage_account_name]
+        account_name = (
+          @options[:azure_storage_account_name] ||
+            azure_credentials[:storage_account_name]
+        )
         account_name = account_name.call(self) if account_name.is_a?(Proc)
 
         account_name

@@ -1,7 +1,6 @@
 .autotest
 History.txt
 Manifest.txt
-README.txt
 Rakefile
 lib/paperclip/storage/azure/environment.rb
 lib/paperclip/storage/azure.rb
